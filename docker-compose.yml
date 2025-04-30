@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      - VITE_API_URL=http://api:3000/api
+      - VITE_ENCRYPTION_SALT=${VITE_ENCRYPTION_SALT}
+
+  api:
+    image: denoland/deno:1.37.0
+    working_dir: /app
+    volumes:
+      - ./api:/app/api
+    command: ["run", "--allow-net", "--allow-env", "--allow-read", "--watch", "api/server.js"]
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    environment:
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_SERVICE_KEY=${SUPABASE_SERVICE_KEY}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - PORT=3000
